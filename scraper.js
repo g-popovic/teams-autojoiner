@@ -4,7 +4,8 @@ const config = require('./config');
 (async () => {
 	const browser = await puppeteer.launch({
 		headless: false,
-		timeout: 0
+		timeout: 0,
+		args: ['--use-fake-ui-for-media-stream']
 	});
 
 	const page = await browser.newPage();
@@ -18,6 +19,10 @@ const config = require('./config');
 	}
 
 	async function checkForMeetings() {
+		await page.click(
+			'.node_modules--msteams-bridges-components-calendar-grid-dist-es-src-renderers-calendar-top-bar-renderer-calendar-top-bar-renderer__topBarContent--2xlZu root-55'
+		);
+
 		const buttonClass =
 			'.node_modules--msteams-bridges-components-calendar-event-card-dist-es-src-renderers-event-card-renderer-event-card-renderer__joinButton--1AeXc';
 
@@ -31,16 +36,22 @@ const config = require('./config');
 
 		if (button) {
 			await page.click(buttonClass);
-			console.log('joining...');
+			page.on('dialog', async dialog => {
+				console.log('dialog appeared');
+				await dialog.accept();
+			});
+			await page.waitForNavigation('networkidle0');
+			await page.click('toggle-button[data-tid="toggle-video"]');
+			await page.click('toggle-button[data-tid="toggle-mute"]');
+
+			setTimeout(() => joinMeeting(page), 5 * 1000);
 		} else {
 			console.log('ckecking...');
-			setTimeout(checkForMeetings, 2000);
+			setTimeout(checkForMeetings, config.refreshInSecs * 1000);
 		}
 	}
 
 	checkForMeetings();
-
-	console.log('joined!');
 })();
 
 async function login(page) {
@@ -62,4 +73,9 @@ async function login(page) {
 	console.log(await page.click('a.use-app-lnk'));
 
 	await page.goto('https://teams.microsoft.com/_#/calendarv2');
+}
+
+async function joinMeeting(page) {
+	console.log('joined!');
+	await page.click('.join-btn');
 }
