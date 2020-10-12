@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 const config = require('./config');
 
-let firstTime = true;
 const refreshSpeed = 2; // Rate at which remaining participants are checked.
 
 (async () => {
@@ -17,8 +16,9 @@ const refreshSpeed = 2; // Rate at which remaining participants are checked.
 	await page.goto('https://teams.microsoft.com/_#/conversations/a');
 	await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
 
+	console.log('Logging in...');
 	await login(page);
-
+	console.log('Login successful. Searching for meetings...');
 	await checkForMeetings(page);
 })();
 
@@ -40,17 +40,15 @@ async function login(page) {
 
 	await page.goto('https://teams.microsoft.com/_#/calendarv2');
 
-	if (firstTime) {
-		firstTime = false;
+	// Set calendar to Single-Day view
 
-		await page.waitForSelector('#id__16');
-		await page.waitForTimeout(1000);
-		await page.click('#id__16');
-
-		await page.waitForSelector('#id__16-menu ul li:first-child');
-		await page.click('#id__16-menu ul li:first-child');
-		await page.reload();
-	}
+	await page.waitForSelector('#id__16');
+	await page.waitForTimeout(1000);
+	await page.click('#id__16');
+	await page.waitForSelector('#id__16-menu ul li:first-child');
+	await page.waitForTimeout(1000);
+	await page.click('#id__16-menu ul li:first-child');
+	await page.reload();
 }
 
 async function checkForMeetings(page) {
@@ -138,6 +136,8 @@ async function joinMeeting(page, id, startTime) {
 	await page.waitForSelector('#roster-button');
 	await page.click('#roster-button');
 
+	console.log('Joiner meeting.');
+
 	setTimeout(
 		() => checkParticipants(page),
 		startTime + config.maxMinsLate * 60 * 1000 - new Date().getTime() || 0
@@ -152,9 +152,8 @@ async function checkParticipants(page) {
 			)
 		).slice(1, -1)
 	);
-	console.log(numOfParticipants);
+
 	if (numOfParticipants - 1 <= config.minParticipants) {
-		console.log('leaving meeting');
 		leaveMeeting(page);
 	} else {
 		setTimeout(() => checkParticipants(page), refreshSpeed * 1000);
@@ -165,6 +164,8 @@ async function leaveMeeting(page) {
 	await page.evaluate(() => document.getElementById('hangup-button').click());
 	await page.waitForTimeout(1000);
 	await page.goto('https://teams.microsoft.com/_#/calendarv2');
+
+	console.log('Left meeting.');
 
 	checkForMeetings(page);
 }
