@@ -1,5 +1,6 @@
 module.exports = {
-	email: '72djp@sms-tv.edu.me',
-	password: 'Djole0980',
-	minParticipants: 0
+	email: require('./secret').email,
+	password: require('./secret').password,
+	minParticipants: 6,
+	maxMinsLate: 2
 };
