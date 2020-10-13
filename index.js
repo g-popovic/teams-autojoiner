@@ -136,7 +136,7 @@ async function joinMeeting(page, id, startTime) {
 	await page.waitForSelector('#roster-button');
 	await page.click('#roster-button');
 
-	console.log('Joiner meeting.');
+	console.log('Joined meeting.');
 
 	setTimeout(
 		() => checkParticipants(page),
@@ -165,7 +165,7 @@ async function leaveMeeting(page) {
 	await page.waitForTimeout(1000);
 	await page.goto('https://teams.microsoft.com/_#/calendarv2');
 
-	console.log('Left meeting.');
+	console.log('Left meeting. Searching for new meetings...');
 
 	checkForMeetings(page);
 }
