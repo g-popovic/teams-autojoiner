@@ -12,6 +12,7 @@ const refreshSpeed = 2; // Rate at which remaining participants are checked.
 
 	const page = await browser.newPage();
 	page.setDefaultTimeout(0);
+    page.setViewport(1366, 768)
 
 	await page.goto('https://teams.microsoft.com/_#/conversations/a');
 	await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
