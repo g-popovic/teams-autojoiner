@@ -4,6 +4,6 @@ Web scraper program that automatically joins any available Microsoft Teams meeti
 
 ## How to use:
 * Download repo
-* Run `npm i`
+* Run `npm install`
 * In the config.js file, enter you Microsoft username and password (feel free to tweak any other params as well)
 * Run `node index.js`
